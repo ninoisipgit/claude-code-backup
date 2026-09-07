@@ -58,10 +58,12 @@ Run this only after I approve.
 2. Follow the `angular-migration` skill's **Migration mode** against the approved plan:
    - Migrate **shared dependencies first**, then the plan's items.
    - Rewrite code strictly to the `AGENTS.md` topic files that apply.
-   - Apply the `fdp-table-and-constants` skill: every API-backed table gets
-     `<fdp-report-table-skeleton>` while its fetch is in flight, and shared/config literals go
-     in `src/app/constants` (`@constants`) — import an existing one or add it there, never
-     inline.
+   - Apply the `fdp-table-and-constants` skill: (1) every API-backed table gets
+     `<fdp-report-table-skeleton>` while its fetch is in flight; (2) shared/config literals go
+     in `src/app/constants` (`@constants`), never inline; (3) migrated field validation, button
+     conditioning, and input behaviour match the legacy code **exactly** — port the Behaviour
+     parity ledger from the plan 1:1, and flag any deviation (never silently add, drop, loosen,
+     or tighten a rule).
    - Modify the necessary files and write the code.
    - Check off each item in `.claude/planner/features/<name>_features.md` as it lands, and
      keep that plan file's own Status current.

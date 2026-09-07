@@ -64,6 +64,25 @@ plan after the user approves it. **You do not implement anything.**
      existing `@constants` export to reuse (`src/app/constants/`), or — if genuinely new and
      reusable — where it should be added (`app.constants.ts` vs `<feature>.constants.ts`) and
      the `index.ts` export. Leave truly local `EMPTY_*` form-draft defaults in the component.
+9. **Behaviour parity (Rule 3 of `fdp-table-and-constants`).** For every form in the feature,
+   read the legacy `.ts` **and** `.html` and build a field-by-field / button-by-button ledger
+   the implementer ports 1:1:
+   - **Validation** — per field: every `Validators.*`, every custom `ValidatorFn`, and every
+     *runtime* rule change (`setValidators` / `clearValidators` / `updateValueAndValidity` in a
+     `valueChanges` sub or a toggle) with its trigger condition. Name the Overhaul equivalent
+     (`requireTrimmed` / `maxLengthField(path.x, n)` / `emailField` / `notFutureField` /
+     `applyWhen(...)` etc.). Flag any field where legacy has **no** rule but the DB/API clearly
+     wants one — as a deviation for the user to accept or decline, never an automatic add.
+   - **Button conditioning** — per button / row action: its `[disabled]`, `*ngIf` / `[hidden]`,
+     `[class.*]`, `[severity]`, and any permission/role/resource gate, with the exact condition.
+   - **Input behaviour** — per input: masks (→ `p-inputmask` / `p-inputnumber` pattern),
+     `readonly`/disable conditions, defaults, `maxlength`, password/show-hide, clear-on-change
+     targets, `valueChanges`+`emitEvent:false` derived-field syncs, and any placeholder that is
+     really help text.
+   - Anything with no clean Overhaul equivalent, or any accessibility-driven change (the
+     `readonly` + `onMouseDown` autofill hack, an underscore "fill-in-the-blank" placeholder) →
+     list it under the plan's **Open questions** / a "deviations" note, with legacy vs Overhaul
+     behaviour side by side.
 
 ## Output
 
@@ -83,6 +102,10 @@ sections:
 - **Tables & constants** — the `fdp-table-and-constants` findings from Method step 8: which
   tables need `<fdp-report-table-skeleton>` (with column counts) and pagination/sorting, and
   which hardcoded literals map to an existing `@constants` export or a new one to add.
+- **Behaviour parity** — the Method step 9 ledger: per-field validation (legacy rule → Overhaul
+  equivalent, incl. conditional/`applyWhen` triggers), per-button conditioning (the exact
+  `[disabled]` / `@if` / permission condition), and per-input behaviour (masks, readonly,
+  clear-on-change, derived syncs). Deviations listed explicitly with legacy-vs-Overhaul.
 - **Step-by-step implementation plan** — ordered, each step naming the files it touches.
 - **Verification** — the exact commands the implementation phase should run
   (`npm run lint`, `npm run build:local`) and what "done" looks like.
