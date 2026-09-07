@@ -7,11 +7,13 @@ description: >-
   and whenever you MIGRATE a form, field, input, or button from the legacy NextGenFDP.UI app.
   Rule 1: every API-backed table shows <fdp-report-table-skeleton> while its fetch is in flight.
   Rule 2: shared/config values live in src/app/constants (@constants), not inline. Rule 3:
-  migrated forms match the legacy code exactly — input validation, button conditioning, input
-  behaviour, every visible label / heading / column / button / message (wording, title case,
-  spelling, punctuation), and padding / margin — nothing added, dropped, loosened, tightened,
-  reworded, recased, or respaced without an explicit flagged deviation. Defers to the repo's
-  own .claude/rules/*.md when present.
+  migrated forms match the legacy code exactly — input validation, the format/mask each input
+  will accept (a field that only took "(123) 456-7890" must not now take "+1 (356) 222-8674"),
+  button conditioning, input behaviour, which elements are shown vs hidden and under what
+  condition, every visible label / heading / column / button / message (wording, title case,
+  spelling, punctuation), and padding / margin — nothing added, dropped, shown, hidden, loosened,
+  tightened, reworded, recased, or respaced without an explicit flagged deviation. Defers to the
+  repo's own .claude/rules/*.md when present.
 ---
 
 # FDP — tables, constants & migration fidelity
@@ -107,8 +109,34 @@ is ported 1:1. The Overhaul mechanism modernises (Reactive → Signal Forms, `nb
 - A conditionally-shown button does not become always-visible; a conditionally-disabled button
   does not become always-enabled; a `*ngIf`'d button behind a permission check keeps that check.
 
+**Visibility — every element shows and hides on the same condition as legacy.**
+
+- This is not just buttons. It covers **any** element legacy renders conditionally: inputs,
+  whole fields (`<fdp-validation>` blocks), fieldsets / sections / cards, table columns and their
+  cells, table rows, tabs, wizard steps, menu items, icons, badges, empty states, help text.
+- Read the legacy `*ngIf` / `[hidden]` / `[class.d-none]` / `*ngSwitch` and reproduce it as the
+  same `@if` / `@switch` under the **same** predicate. If legacy shows a column only when
+  `participantId > 0`, or a field only when `enableFullNameFormat`, or a section only when a
+  checkbox is unticked, the migration gates it on the same thing.
+- **Both directions are regressions:** an element legacy shows conditionally must not become
+  always-visible, and an element legacy always shows must not become conditional or disappear.
+- A legacy `*ngIf` whose condition is **permanently false** (a flag never wired, a config never
+  supplied) renders nothing — the faithful migration also renders nothing. Don't resurrect a
+  dead control; note *why* it's omitted.
+- Elements hidden with CSS visibility rather than removed from the DOM (`visibility: hidden`,
+  `opacity: 0`, off-screen) still count — match the observable result (usually: actually remove
+  it, and say so).
+
 **Inputs — port every behaviour.**
 
+- **An input's accepted format IS frontend validation — reproduce it exactly, neither looser nor
+  stricter.** If legacy only accepts `(123) 131-2312` (a `mask="(000) 000-0000"`), the Overhaul
+  field must accept *only* that — a `p-inputmask` with `mask="(999) 999-9999"`, not a free-text
+  box that also takes `+1 (356) 222-8674`, an international format, letters, or a different digit
+  count. This covers masks, `pattern=`, `type="number"`/`type="email"`/`type="tel"`, `inputmode`,
+  `maxlength`/`minlength`, `min`/`max`/`step` on a number, allowed characters, and any keypress or
+  paste filter. A migrated field that takes input the legacy field would have rejected is a
+  regression, not a nicety — flag it if it is intended, fix it otherwise.
 - Masks → `p-inputmask` / `p-inputnumber mode="currency"` with the same accepted pattern; a legacy
   `mask="(000) 000-0000"` maps to `(999) 999-9999`, not "no mask".
 - `readonly` / disable-when conditions, default values, `maxlength` HTML attr (where `[formField]`
@@ -156,9 +184,11 @@ is ported 1:1. The Overhaul mechanism modernises (Reactive → Signal Forms, `nb
 — a broken accessibility hack (`readonly` + `onMouseDown`), genuinely dead code, a real bug, a
 mechanism with no Overhaul equivalent, a typo or casing the user asked to fix, spacing a shared
 `fdp-*` / PrimeNG component dictates, or a rule the user asked to add — say so in the plan and
-in the PR notes, with the legacy behaviour, wording, or spacing and the new one side by side.
-Loosening, tightening, dropping, adding, rewording, recasing, or respacing anything the user can
-see or that the form enforces, without that call-out, is the failure this rule exists to catch.
+in the PR notes, with the legacy behaviour, wording, spacing, accepted input, or visibility
+condition and the new one side by side. Loosening, tightening, dropping, adding, rewording,
+recasing, respacing, showing, hiding, or widening what an input will accept — anything the user
+can see or that the form enforces, without that call-out — is the failure this rule exists to
+catch.
 
 The repo's `.claude/rules/validation.md`, `form-elements.md`, `tooltip.md` and `primeng.md`
 define *how* to express these in Overhaul; this rule is about *fidelity to what legacy did*.
