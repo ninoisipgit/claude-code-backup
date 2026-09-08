@@ -12,12 +12,14 @@ claude/
   skills/
     migrate-feature/SKILL.md        # /migrate-feature <feature> — Opus plan → approve → default-model implement
     fdp-table-and-constants/SKILL.md# always-on: API tables get <fdp-report-table-skeleton>; literals go in @constants
+    migration-qa/SKILL.md           # /migration-qa <component> — QA a migrated component: LEGACY vs OVERHAUL behavior
   agents/
     feature-migration-planner.md    # Opus planning subagent used by /migrate-feature phase 1
 ```
 
 `migrate-feature` depends on `feature-migration-planner` (it delegates planning to it) — install
-both. `fdp-table-and-constants` is independent.
+both. `fdp-table-and-constants` and `migration-qa` are independent. `migration-qa` runs AFTER a
+component is migrated and reports PASS / WARNING / FAIL / UNKNOWN without changing code.
 
 These wrap the **NextGenFDP.UI.Overhaul** repo's own `/migrate --feature` (`angular-migration`)
 workflow; they assume that repo's `.claude/skills/` and `.claude/rules/` are present when they run.
@@ -34,6 +36,7 @@ Final layout on the new device:
 ```
 ~/.claude/skills/migrate-feature/SKILL.md
 ~/.claude/skills/fdp-table-and-constants/SKILL.md
+~/.claude/skills/migration-qa/SKILL.md
 ~/.claude/agents/feature-migration-planner.md
 ```
 
