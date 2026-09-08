@@ -108,6 +108,15 @@ is ported 1:1. The Overhaul mechanism modernises (Reactive → Signal Forms, `nb
   `isPrimary` rows, or shows a button only for a resource/role, the migration does the same.
 - A conditionally-shown button does not become always-visible; a conditionally-disabled button
   does not become always-enabled; a `*ngIf`'d button behind a permission check keeps that check.
+- **When the migration consolidates or relocates a control legacy repeats** — per-step wizard
+  Previous/Next moved into one shared footer, per-row actions folded into a toolbar, the same
+  Save duplicated across N sections — the merged control keeps the **union of every source
+  instance's condition**, evaluated by context (step / row / mode). Enumerate all source
+  instances and their `[disabled]` / `*ngIf` / `[hidden]` before writing the merged one;
+  capturing a single condition for a merged control is the tell that the others were dropped.
+  Watch the ends specifically: the first step with no Previous, the last step showing Submit
+  instead of Next, a step that disables both buttons while an inline editor is open, a step
+  that gates Next on its own "at least one selected" check.
 
 **Visibility — every element shows and hides on the same condition as legacy.**
 
